@@ -1,0 +1,5 @@
+#86BA94 dark green
+#263238 light blue
+#FFFFFF black
+#F3F3F3 greyish
+<a href="https://storyset.com/together">Together illustrations by Storyset</a>
