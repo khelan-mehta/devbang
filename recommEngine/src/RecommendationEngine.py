@@ -23,7 +23,7 @@ class Recommender():
     # config options
     dbn = "nourish.db"
     table = "foods"
-    schemaQuery = f"CREATE TABLE {table}(fid PRIMARY KEY, fname, fpv, fcv, ffv, fprice)"
+    schemaQuery = f"CREATE TABLE {table}(fid PRIMARY KEY, fname, fpv, fcv, ffv, fprice, fnutrition, ftype)"
     food_items = []
 
     def __init__(self, dataset_pth = 'FinalDataset.csv', results = 3) -> None:
@@ -81,11 +81,12 @@ class Recommender():
 
     def seed_db(self):
         for idx, rows in self.data.iterrows():
-            # print(tuple(rows)) # working nice
+            print(tuple(rows)) # working nice
             dt = (idx,)
 
             self.db.insertOne(dt + tuple(rows))
         pass
+
 
 
 # query_food = input("Enter the name of the food item: ")
