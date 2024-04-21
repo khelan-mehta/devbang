@@ -1,14 +1,16 @@
 "use client";
 import { Icons } from "@/components/icons";
-import { UserButton, redirectToSignIn, useUser } from "@clerk/nextjs";
-
+import { useUser } from "@clerk/nextjs";
+import "./style.css";
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import "../../../public/Preview.svg";
-import Chatbox from "@/components/dabba";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Navbar from "@/components/Navbar";
 import SearchBox from "@/components/SearchBox";
-import { PieChart, Pie, Cell, Legend } from "recharts";
+import { PieChart, Pie, Cell } from "recharts";
+import nlp from "compromise";
 import {
   Table,
   TableBody,
@@ -20,7 +22,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Undo } from "lucide-react";
+import { Drumstick, Undo, VeganIcon } from "lucide-react";
+import axios from "axios";
 
 const foodArray = [
   {
@@ -135,6 +138,11 @@ foodArray.sort((a, b) => b.proteinPercentage - a.proteinPercentage);
 
 const COLORS = ["#263238", "#86BA94", "#39E75F"];
 const page = () => {
+  const extractFoodName = (input: string): string => {
+    const doc = nlp(input.trim().toLowerCase());
+    const foodName = doc.nouns().out("array").join(" ");
+    return foodName;
+  };
   const { isSignedIn, user, isLoaded } = useUser();
   if (isSignedIn) {
     console.log("Tu Hai");
@@ -143,13 +151,24 @@ const page = () => {
     redirect("/signin");
   }
   const [prompt, setPrompt] = useState<string>("");
-  const handlePromptSearch = (promptFromBox: string) => {
+  const handlePromptSearch = async (promptFromBox: string) => {
     setPrompt(promptFromBox);
-    setMessageArray((messages) => {
-      return [
-        ...messages,
-        { message: promptFromBox, timeStamp: currentTime, author: false },
-      ];
+    const updatedArray = [
+      ...messageArray,
+      { message: promptFromBox, timeStamp: currentTime, author: false },
+    ]; // Modify this line to update the array as needed
+    setMessageArray(updatedArray);
+    sessionStorage.setItem("dataArray", JSON.stringify(updatedArray));
+
+    const foodName = extractFoodName(prompt);
+    console.log("Extracted food name:", foodName);
+
+    await axios.get(`http://localhost:5000/${promptFromBox}`).then((r) => {
+      if (r.status === 200) {
+        const totalData = r.data;
+        console.log(totalData);
+        
+      }
     });
   };
   const [currentStat, setCurrentStat] = useState(foodArray[0]);
@@ -161,6 +180,10 @@ const page = () => {
   ];
   const [currentTime, setCurrentTime] = useState<string>("");
   useEffect(() => {
+    const storedData = sessionStorage.getItem("dataArray");
+    if (storedData) {
+      setMessageArray(JSON.parse(storedData));
+    }
     const getCurrentTime = () => {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, "0");
@@ -195,8 +218,28 @@ const page = () => {
   return (
     <div className="flex flex-col justify-between  h-screen bg-white p-8">
       <Navbar />
-      <div className="flex justify-around">
-        <div className="w-[60vw] h-[70vh]    flex flex-col">
+      <div className="flex bg-[#F3F3F3] mr-[1vw] text-center justify-center self-end p-2 mt-[-20px] rounded-lg w-[250px]">
+        <RadioGroup defaultValue="All" className="flex gap-2">
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="All" id="r1" />
+            <Label htmlFor="r1">All</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="comfortable" id="r2" />
+            <Label htmlFor="r2" className="flex">
+              Veg
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="compact" id="r3" />
+            <Label htmlFor="r3" className="flex">
+              Non Veg
+            </Label>
+          </div>
+        </RadioGroup>
+      </div>
+      <div className="flex justify-around ">
+        <div className="w-[60vw] h-[70vh] mt-[-16vh] flex flex-col">
           <div className="flex justify-around m-4">
             <div className="w-[25vw] flex flex-col h-[33vh] cursor-pointer  rounded-lg bg-[#F3F3F3] border-solid">
               <p className="m-4 cursor-pointer text-[#86BA94] font-bold text-[18px]">
@@ -280,7 +323,7 @@ const page = () => {
               </div>
             </div>
           </div>
-          <div className="overflow-y-scroll">
+          <div className="overflow-y-scroll customScrollBar">
             <Table className="w-[55vw] ml-10">
               <TableCaption>A list of Recommended Searches</TableCaption>
               <TableHeader>
@@ -317,12 +360,12 @@ const page = () => {
             </Table>
           </div>
         </div>
-        <div className="w-[30vw] h-[85vh]  m-3 z-20 shadow-lg rounded-[10px] bg-[white]">
-          <div className="flex  rounded-t-[10px] bg-[#F3F3F3] ">
+        <div className="w-[30vw] h-[75vh] mt-[-40px] ml-[5vw] overflow-y-scroll customScrollBar m-3 z-20 shadow-lg rounded-[10px] bg-[white]">
+          <div className="flex  rounded-t-[10px] bg-[#f4f4f4] ">
             <Icons.Robot />
             <p className="ml-1 self-center font-bold"> Kiyo</p>
           </div>
-          <div className="messages flex flex-col p-2">
+          <div className="messages flex flex-col p-2 ">
             {messageArray.map((message, index) => {
               return (
                 <div

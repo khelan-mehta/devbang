@@ -11,10 +11,10 @@ const SearchBox = ({sendDataToParent}:any) => {
     sendDataToParent(prompt);
   }
   return (
-    <div className="flex w-full gap-2 mt-[-12vh]">
+    <div className="flex w-full gap-2 mt-[-22vh]">
       <Textarea
-        style={{ resize: "none" }}
-        className="p-2 h-[60px] pt-4 text-[18px] w-[57vw]"
+        style={{ resize: "none", maxHeight: "40px" }}
+        className="p-2 max-h-[30px] pt-6 text-[18px] w-[57vw]"
         placeholder=" What kind of Nutrients are in your mind?"
         onChange={(e) => {
           setPrompt(e.target.value);
