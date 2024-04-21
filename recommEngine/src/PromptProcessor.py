@@ -3,7 +3,7 @@ from openai import OpenAI
 
 client = OpenAI(
     # This is the default and can be omitted
-    api_key="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",
+    api_key="",
 )
 
 chat_completion = client.chat.completions.create(
