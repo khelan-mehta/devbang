@@ -1,7 +1,7 @@
 "use client";
 import { Icons } from "@/components/icons";
 import { UserButton, redirectToSignIn, useUser } from "@clerk/nextjs";
-import { User } from "@clerk/nextjs/server";
+
 import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import "../../../public/Preview.svg";
@@ -145,6 +145,12 @@ const page = () => {
   const [prompt, setPrompt] = useState<string>("");
   const handlePromptSearch = (promptFromBox: string) => {
     setPrompt(promptFromBox);
+    setMessageArray((messages) => {
+      return [
+        ...messages,
+        { message: promptFromBox, timeStamp: currentTime, author: false },
+      ];
+    });
   };
   const [currentStat, setCurrentStat] = useState(foodArray[0]);
   const [visible, setVisible] = useState(false);
@@ -153,6 +159,21 @@ const page = () => {
     { name: "Carbs", value: currentStat.carbsPercentage },
     { name: "Fiber", value: currentStat.fiberPercentage },
   ];
+  const [currentTime, setCurrentTime] = useState<string>("");
+  useEffect(() => {
+    const getCurrentTime = () => {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      setCurrentTime(`${hours}:${minutes}`);
+    };
+
+    // Call getCurrentTime initially and then every minute
+    getCurrentTime();
+    const intervalId = setInterval(getCurrentTime, 60000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     if (currentStat !== foodArray[0]) {
@@ -161,6 +182,15 @@ const page = () => {
       setVisible(false);
     }
   }, [currentStat]);
+
+  const [messageArray, setMessageArray] = useState([
+    {
+      message:
+        "Welcome! 🌱 Ready to discover tasty, nutritious recipes and expert tips for a healthier, happier you? Let's get started!",
+      timeStamp: currentTime,
+      author: true,
+    },
+  ]);
 
   return (
     <div className="flex flex-col justify-between  h-screen bg-white p-8">
@@ -287,7 +317,36 @@ const page = () => {
             </Table>
           </div>
         </div>
-        <div className="w-[30vw] h-[85vh] border-2 border-black border-solid "></div>
+        <div className="w-[30vw] h-[85vh]  m-3 z-20 shadow-lg rounded-[10px] bg-[white]">
+          <div className="flex  rounded-t-[10px] bg-[#F3F3F3] ">
+            <Icons.Robot />
+            <p className="ml-1 self-center font-bold"> Kiyo</p>
+          </div>
+          <div className="messages flex flex-col p-2">
+            {messageArray.map((message, index) => {
+              return (
+                <div
+                  className={
+                    message.author
+                      ? "flex max-w-[60%] flex-col self-start rounded-lg   bg-yellow-100 p-2 m-1 text-[16px]"
+                      : "flex max-w-[60%] flex-col self-end rounded-lg  bg-green-100 p-2 m-1 text-[16px]"
+                  }
+                >
+                  <p>{message.message}</p>
+                  <p
+                    className={
+                      message.author
+                        ? "text-[12px] mt-[-10px] p-1 rounded-lg bg-white self-end "
+                        : "text-[12px] p-1 rounded-lg bg-white self-end "
+                    }
+                  >
+                    {currentTime}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
       <SearchBox sendDataToParent={handlePromptSearch} />
     </div>

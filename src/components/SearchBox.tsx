@@ -11,7 +11,7 @@ const SearchBox = ({sendDataToParent}:any) => {
     sendDataToParent(prompt);
   }
   return (
-    <div className="flex w-full gap-2 mt-[-10vh]">
+    <div className="flex w-full gap-2 mt-[-12vh]">
       <Textarea
         style={{ resize: "none" }}
         className="p-2 h-[60px] pt-4 text-[18px] w-[57vw]"
