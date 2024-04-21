@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-
+import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/nextjs";
+import { Icons } from "@/components/icons";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -15,8 +16,35 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
+    <ClerkProvider
+      appearance={{
+        elements: {
+          footerActionLink: {
+            backgroundColor: "white",
+            color: "#86BA94",
+          },
+          formButtonPrimary:
+            "bg-[#86BA94] hover:bg-[#86BA94] text-sm normal-case",
+          card: "shadow-lg ",
+          headerTitle: "text-[#86BA94]",
+          headerSubtitle: "text-[#263238] font-bold",
+          dividerText: "text-[#86BA94]",
+        },
+        variables: {
+          colorText: "black",
+        },
+      }}
+    >
+      <html lang="en">
+        <body>
+          <ClerkLoading>
+            <div className="flex w-full h-[100vh] align-middle mt-[200px] justify-center">
+              <Icons.avatar className=""/>
+            </div>
+          </ClerkLoading>
+          <ClerkLoaded>{children}</ClerkLoaded>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
